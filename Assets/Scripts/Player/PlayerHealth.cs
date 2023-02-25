@@ -18,16 +18,17 @@ public class PlayerHealth : MonoBehaviour
     {
         health = 10;
         healthBar.fillAmount = health/10;
-        drainingStamina=false;   
+        stamina = 5; // set initial stamina to full
+        drainingStamina=false;    
     }
 
     // Update is called once per frame
     void Update()
     {
         if(!drainingStamina && stamina<=10){
-            stamina+=.5f*Time.deltaTime;
+            stamina+=1f*Time.deltaTime;
         }
-        staminaBar.fillAmount = stamina/10;
+        staminaBar.fillAmount = stamina/5;
     }
 
     void takeDamage(float dmg){
