@@ -15,6 +15,9 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 movDirection;
     public int[] lastPress;
     public int[] keyStates;
+    public Animator animator;
+    public Vector2 movement;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,7 +37,15 @@ public class PlayerMovement : MonoBehaviour
 
     // Update is called once per frame
     void Update()
+
     {
+        movement.x = Input.GetAxisRaw("Horizontal");
+        movement.y = Input.GetAxisRaw("Vertical");
+
+        animator.SetFloat("Horizontal", movement.x);
+        animator.SetFloat("Vertical", movement.y);
+        animator.SetFloat("Speed",movement.sqrMagnitude);
+
         movementFunction();
     }
 
