@@ -5,14 +5,21 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
 
+    PlayerHealth pHealth;
+
+
     public Transform moveTo;
-    public float moveSpeed = 5;
+    public float moveSpeed;
+    public float walkSpeed = 5;
+    public float sprintSpeed = 7.5f;
     public Vector3 movDirection;
     public int[] lastPress;
     public int[] keyStates;
     // Start is called before the first frame update
     void Start()
     {
+        moveSpeed=sprintSpeed;
+        pHealth = transform.GetComponent<PlayerHealth>();
          keyStates = new int[4];
          lastPress = new int[4];
         for (int i = 0; i < 4; i++)
@@ -32,6 +39,16 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void movementFunction(){
+
+        if(Input.GetKey(KeyCode.LeftShift) && pHealth.stamina > 0){
+            moveSpeed = sprintSpeed;
+            pHealth.stamina-=Time.deltaTime;
+            if(!pHealth.drainingStamina){pHealth.drainingStamina=true;}
+        }else{
+            moveSpeed=walkSpeed;
+            pHealth.drainingStamina=false;
+        }
+
         transform.position = Vector2.MoveTowards(transform.position, moveTo.position, moveSpeed*Time.deltaTime);
         parseToMovDirection();
         determineLastPress();
