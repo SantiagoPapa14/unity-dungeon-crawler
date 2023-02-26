@@ -18,7 +18,7 @@ public class PlayerHealth : MonoBehaviour
     {
         health = 10;
         healthBar.fillAmount = health/10;
-        stamina = 5; // set initial stamina to full
+        stamina = 10; // set initial stamina to full
         drainingStamina=false;    
     }
 
@@ -26,9 +26,9 @@ public class PlayerHealth : MonoBehaviour
     void Update()
     {
         if(!drainingStamina && stamina<=10){
-            stamina+=1f*Time.deltaTime;
+            stamina+=.5f*Time.deltaTime;
         }
-        staminaBar.fillAmount = stamina/5;
+        staminaBar.fillAmount = stamina/10;
     }
 
     void takeDamage(float dmg){

@@ -41,9 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Tiles
-    uniqueID: 4250941897
+  - name: Terrain
+    uniqueID: 4189426099
     locked: 0
-  - name: Jugador
-    uniqueID: 2425651459
+  - name: Player
+    uniqueID: 1536370007
     locked: 0

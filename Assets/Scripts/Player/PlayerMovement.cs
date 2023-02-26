@@ -6,19 +6,16 @@ public class PlayerMovement : MonoBehaviour
 {
 
     PlayerHealth pHealth;
-
-
     public Transform moveTo;
     public float moveSpeed;
     public float walkSpeed = 5;
     public float sprintSpeed = 7.5f;
     public Vector3 movDirection;
+    public Vector2 animDirection;
     public int[] lastPress;
     public int[] keyStates;
     public Animator animator;
-    public Vector2 movement;
 
-    // Start is called before the first frame update
     void Start()
     {
         moveSpeed=sprintSpeed;
@@ -34,41 +31,41 @@ public class PlayerMovement : MonoBehaviour
         moveTo.transform.position = transform.position;   
         movDirection = new Vector3(0,0,0); 
     }
-
-    // Update is called once per frame
     void Update()
-
     {
-        movement.x = Input.GetAxisRaw("Horizontal");
-        movement.y = Input.GetAxisRaw("Vertical");
+        animator.SetFloat("Horizontal", animDirection.x);
+        animator.SetFloat("Vertical", animDirection.y);
+        parseToMovDirection();
+        determineLastPress();
+        setAnimationVariables();
+    }
 
-        animator.SetFloat("Horizontal", movement.x);
-        animator.SetFloat("Vertical", movement.y);
-        animator.SetFloat("Speed",movement.sqrMagnitude);
-
+    void FixedUpdate(){
         movementFunction();
     }
 
     void movementFunction(){
-
-        if(Input.GetKey(KeyCode.LeftShift) && pHealth.stamina > 0){
+        if(Input.GetKey(KeyCode.LeftShift) && pHealth.stamina > 0.1f){
             moveSpeed = sprintSpeed;
             pHealth.stamina-=Time.deltaTime;
-            if(!pHealth.drainingStamina){pHealth.drainingStamina=true;}
+            if(!pHealth.drainingStamina){
+                pHealth.drainingStamina=true;
+            }
         }else{
             moveSpeed=walkSpeed;
             pHealth.drainingStamina=false;
         }
 
-        transform.position = Vector2.MoveTowards(transform.position, moveTo.position, moveSpeed*Time.deltaTime);
-        parseToMovDirection();
-        determineLastPress();
-        if(Vector2.Distance(transform.position, moveTo.position)==0){
+        if(Vector2.Distance(transform.position, moveTo.position)!=0){
+            transform.position = Vector2.MoveTowards(transform.position, moveTo.position, moveSpeed*Time.deltaTime);
+            animator.SetBool("Movement", true);
+
+        }else{
             moveTo.position += movDirection;
+            if(movDirection.x == 0 && movDirection.y == 0){
+                animator.SetBool("Movement", false);
+            }
         }
-
-
-
     }
     void determineLastPress(){
         //Key States
@@ -149,4 +146,26 @@ public class PlayerMovement : MonoBehaviour
         if(movDirection.x!=0){movDirection.y=0;}
 
     }
+    void setAnimationVariables(){
+        if(moveTo.position.x > transform.position.x){
+                animDirection.x = 1;
+        }else if (moveTo.position.x < transform.position.x){
+            animDirection.x = -1;
+        }else{
+            if(movDirection.x==0){
+              animDirection.x = 0;  
+            }
+        }
+
+        if(moveTo.position.y > transform.position.y){
+            animDirection.y = 1;
+        }else if (moveTo.position.y < transform.position.y){
+            animDirection.y = -1;
+        }else{
+            if(movDirection.y==0){
+              animDirection.y = 0;  
+            }
+        }
+    }
+
 }
