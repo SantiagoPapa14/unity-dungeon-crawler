@@ -26,13 +26,16 @@ public class NetworkDownloader : MonoBehaviour
         try{
             PlayerState recv = JsonUtility.FromJson<PlayerState>(packet);
 
-            if(!manager.isOnline(recv.username)){
-                manager.queue.Add(recv);
-            }
-            
-            else{
-                Vector3 pos = new Vector3(float.Parse(recv.posX),float.Parse(recv.posY),0);
-                manager.setPlayerPos(recv.username, pos);
+            if(recv.username != manager.username){
+                
+                Debug.Log(packet);
+                if(!manager.isOnline(recv.username)){
+                    manager.queue.Add(recv);
+                }
+                else{
+                    Vector3 pos = new Vector3(float.Parse(recv.posX),float.Parse(recv.posY),0);
+                    manager.setPlayerPos(recv.username, pos);
+                }
             }
 
 

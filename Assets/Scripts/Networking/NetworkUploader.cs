@@ -53,7 +53,8 @@ public class NetworkUploader : MonoBehaviour
     void FixedUpdate()
     {
         if(manager.onlineMode){
-            try{                  
+            try{               
+                if(pState.username != manager.username){pState.username=manager.username;}   
                 if(Mathf.Abs(player.position.x - pState.getPos().x) > 0.05f || Mathf.Abs(player.position.y -pState.getPos().y) > 0.05f){
                     pState.setPos(player.position);
                     string sData = pState.jsonString();

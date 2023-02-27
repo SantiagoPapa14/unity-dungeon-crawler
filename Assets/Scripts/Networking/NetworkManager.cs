@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using System.Net.Sockets;
 using System.IO;
 using System.Text;
+using System;
 
 public class NetworkManager : MonoBehaviour
 {
@@ -28,18 +30,7 @@ public class NetworkManager : MonoBehaviour
 
     void Start()
     {
-        try{
-            client = new TcpClient(hostname, port);
-            networkStream = client.GetStream(); 
-            writer = new BinaryWriter(networkStream);
-            reader = new BinaryReader(networkStream); 
-            onlineMode = true;
-            Debug.Log("Connected to the server.");
-        }
-        catch{
-            onlineMode = false;
-            Debug.Log("Could not establish a connection to the server.");
-        } 
+        onlineMode = false;
     }
 
     public void FixedUpdate(){
@@ -67,9 +58,11 @@ public class NetworkManager : MonoBehaviour
     }
 
     public void updatePositions(){
-        for (int i = 0; i < playersOn.Count; i++)
-        {
-            players[i].transform.position = playersOn[i].getPos();
+        if(onlineMode){
+            for (int i = 0; i < playersOn.Count; i++)
+            {
+                players[i].transform.position = playersOn[i].getPos();
+            }
         }
     }
 
@@ -89,5 +82,24 @@ public class NetworkManager : MonoBehaviour
 
     public void checkConn(string where){
         Debug.Log("Some sort of connection issue popped up in the "+where);
+    }
+
+    public void retryConnection(){
+        try{
+            string newHost = GameObject.Find("serverAddress").transform.GetComponent<TMP_InputField>().text;
+            hostname = newHost;
+            string newUsername = GameObject.Find("playerUsername").transform.GetComponent<TMP_InputField>().text;
+            username = newUsername;
+            client = new TcpClient(newHost, port);
+            networkStream = client.GetStream(); 
+            writer = new BinaryWriter(networkStream);
+            reader = new BinaryReader(networkStream); 
+            onlineMode = true;
+            Debug.Log("Connected to the server.");
+        }
+        catch(Exception e){
+            onlineMode = false;
+            Debug.Log(e.ToString());
+        } 
     }
 }

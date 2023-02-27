@@ -10,13 +10,13 @@ clientsAmmount = -1
 
 registeredAccounts = []
 registeredAccounts.append("Blue Saint")
+registeredAccounts.append("Red Monk")
 
 #Declare Functions
 def broadcastMsg(msg, index):
     global clients
     for client in clients:
-        if client != clients[index]:
-            client.sendall(msg)
+        client.sendall(msg)
 
 def handleClient(conn, add, index):
     while True:
@@ -26,9 +26,10 @@ def handleClient(conn, add, index):
             jMsg = json.loads(msg)
             if jMsg["username"] in registeredAccounts:
                 conn.sendall(buf) 
+        except Exception as e:
+            print("Got the error: ", e)
         finally:
-            print("Received: ", msg, " from ", add, " [",index,"]")
-            #broadcastMsg(buf, index)
+            broadcastMsg(buf, index)
 
 
 #Preliminary Actions
