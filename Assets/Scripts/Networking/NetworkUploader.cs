@@ -55,7 +55,7 @@ public class NetworkUploader : MonoBehaviour
         if(manager.onlineMode){
             try{               
                 if(pState.username != manager.username){pState.username=manager.username;}   
-                if(Mathf.Abs(player.position.x - pState.getPos().x) > 0.05f || Mathf.Abs(player.position.y -pState.getPos().y) > 0.05f){
+                if(Mathf.Abs(player.position.x - pState.getPos().x) > 0.1f || Mathf.Abs(player.position.y -pState.getPos().y) > 0.1f){
                     pState.setPos(player.position);
                     string sData = pState.jsonString();
                     char[] cData = new char[sData.Length];

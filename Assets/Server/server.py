@@ -8,28 +8,37 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 clients = []
 clientsAmmount = -1
 
-registeredAccounts = []
-registeredAccounts.append("Blue Saint")
-registeredAccounts.append("Red Monk")
-
 #Declare Functions
 def broadcastMsg(msg, index):
     global clients
     for client in clients:
-        client.sendall(msg)
+        client.sendall(msg.encode())
+
+def analyzePacket(sock, data, clientId):
+    print(data)
+    try:
+        broadcastMsg(data, clientId)
+    except Exception as e:
+        print("We got a trash packet from clientId ", clientId, " reason: ", e)
 
 def handleClient(conn, add, index):
+    pack = ""
     while True:
-        buf = conn.recv(1024) 
-        msg = buf.decode()
-        try:
-            jMsg = json.loads(msg)
-            if jMsg["username"] in registeredAccounts:
-                conn.sendall(buf) 
-        except Exception as e:
-            print("Got the error: ", e)
-        finally:
-            broadcastMsg(buf, index)
+        try: 
+            buf = conn.recv(1) 
+            c = buf.decode()
+            if c!='}':
+                pack+=c
+            else:
+                pack+=c
+                analyzePacket(conn, pack, index)
+                pack=""
+        except:
+            print("We lost connection with ", index)
+            clients.pop(index)
+            break
+
+        
 
 
 #Preliminary Actions
