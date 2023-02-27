@@ -1,93 +1,93 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using System.Net.Sockets;
 using System.IO;
 using System.Text;
-using UnityEngine;
 
-public class PlayerState{
-public Vector3 position;
-public PlayerState(Vector3 position){
-    this.position = position;
-}
-
-public void setPos(Vector2 position){
-
-    this.position.x = float.Parse(position.x.ToString("F1"));
-    this.position.y = float.Parse(position.y.ToString("F1"));
-}
-public string jsonString(){
-    string data = JsonUtility.ToJson(this);
-    return data;
-}
-
-}
 public class NetworkManager : MonoBehaviour
 {
 
-    #region Variables
+    #region  Variables
     TcpClient client;
     public string hostname = "127.0.0.1";
     public int port = 1404;
     NetworkStream networkStream;
-    BinaryWriter writer;
-    byte[] myWriteBuffer;
-    bool onlineMode;
+    public BinaryWriter writer;
+    public BinaryReader reader;
+    public bool onlineMode;
+        
+    public List<PlayerState> queue = new List<PlayerState>();
+    public List<PlayerState> playersOn = new List<PlayerState>();
+    public List<GameObject> players = new List<GameObject>();
 
-    PlayerState pState;
-    Transform player;
-    
+
+    public GameObject playerPrefab;
+    public string username = "Blaster :D";
     #endregion
 
     void Start()
     {
-        player = GameObject.Find("Player").transform;
-        pState = new PlayerState(new Vector3(0,0,0));
         try{
             client = new TcpClient(hostname, port);
             networkStream = client.GetStream(); 
-            writer = new BinaryWriter(networkStream); 
+            writer = new BinaryWriter(networkStream);
+            reader = new BinaryReader(networkStream); 
             onlineMode = true;
             Debug.Log("Connected to the server.");
         }
         catch{
             onlineMode = false;
             Debug.Log("Could not establish a connection to the server.");
-        }  
-    }
-    void Update()
-    {
-        
-        if(onlineMode){
-            #region sendData
-            try{
-                if(player == null){
-                    player = GameObject.Find("Player").transform;
-                }else{
-                    if(Mathf.Abs(player.position.x - pState.position.x) > 0.1f || Mathf.Abs(player.position.y - pState.position.y) > 0.1f){
-                        pState.setPos(player.position);
-                        writer.Write(pState.jsonString());
-                    }
-                }
-            }catch{
-                if(writer != null){
-                    writer.Close();
-                }
-                if(networkStream != null){
-                    networkStream.Close();
-                }
-                if(client != null){
-                    client.Close();
-                }
-                if(onlineMode){
-                    onlineMode = false;
-                }
-            }
-            #endregion
-            #region receiveData
-            #endregion
-        }
-        
+        } 
     }
 
+    public void FixedUpdate(){
+        acceptPlayers();
+        updatePositions();
+    }
+
+    public bool isOnline(string username){
+        for (int i = 0; i < playersOn.Count; i++)
+        {
+            if(playersOn[i].username == username){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setPlayerPos(string username, Vector3 pos){
+        for (int i = 0; i < playersOn.Count; i++)
+        {
+            if(playersOn[i].username == username){
+                playersOn[i].setPos(pos);
+            }
+        }
+    }
+
+    public void updatePositions(){
+        for (int i = 0; i < playersOn.Count; i++)
+        {
+            players[i].transform.position = playersOn[i].getPos();
+        }
+    }
+
+    public void acceptPlayers(){
+        try{
+            if(queue.Count>0){
+                PlayerState playerNew = queue[0];
+                Vector3 pos = new Vector3(float.Parse(playerNew.posX),float.Parse(playerNew.posY),0);
+                GameObject newPlayer = Instantiate(playerPrefab, pos, Quaternion.identity, null);
+                newPlayer.name = playerNew.username;
+                players.Add(newPlayer);
+                playersOn.Add(playerNew);
+                queue.RemoveAt(0);
+            }
+        }catch{}
+    }
+
+    public void checkConn(string where){
+        Debug.Log("Some sort of connection issue popped up in the "+where);
+    }
 }
