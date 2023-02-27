@@ -23,18 +23,21 @@ def analyzePacket(sock, data, clientId):
 
 def handleClient(conn, add, index):
     pack = ""
+    count = 0
     while True:
         try: 
             buf = conn.recv(1) 
             c = buf.decode()
-            if c!='}':
-                pack+=c
-            else:
-                pack+=c
+            if c == '{':
+                count+=1
+            elif c=='}':
+                count-=1
+            pack+=c
+            if count <= 0:
                 analyzePacket(conn, pack, index)
-                pack=""
-        except:
-            print("We lost connection with ", index)
+                pack = ""
+        except Exception as e:
+            print("We lost connection with ", index, " due to ", e)
             clients.pop(index)
             break
 

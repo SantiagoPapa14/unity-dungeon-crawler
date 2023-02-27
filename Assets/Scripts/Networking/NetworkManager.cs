@@ -48,11 +48,12 @@ public class NetworkManager : MonoBehaviour
         return false;
     }
 
-    public void setPlayerPos(string username, Vector3 pos){
+    public void setPlayerPos(string username, Vector3 pos, Vector2 anim){
         for (int i = 0; i < playersOn.Count; i++)
         {
             if(playersOn[i].username == username){
                 playersOn[i].setPos(pos);
+                playersOn[i].animDirection = anim;
             }
         }
     }

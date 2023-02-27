@@ -34,7 +34,7 @@ public class NetworkDownloader : MonoBehaviour
                 }
                 else{
                     Vector3 pos = new Vector3(float.Parse(recv.posX),float.Parse(recv.posY),0);
-                    manager.setPlayerPos(recv.username, pos);
+                    manager.setPlayerPos(recv.username, pos, recv.animDirection);
                 }
             }
 
@@ -45,21 +45,25 @@ public class NetworkDownloader : MonoBehaviour
         }
     }
     void recvMsg(){
-        string packetTemp = "{";
+        string packetTemp = "";
+        int count = 0;
         while(true){
             if(manager.onlineMode){
                 try{           
                     char c = manager.reader.ReadChar();
-                    if(c!='}'){
-                        packetTemp+=c;
+                    if(c == '{'){
+                        count+=1;
                     }
-                    else{
-                        packetTemp+=c;
+                    else if(c=='}'){
+                        count-=1;
+                    }
+                    packetTemp+=c;
+                    if (count <= 0){
                         analyzePacket(packetTemp);
                         packetTemp = "";
                     }
                 }catch{
-                   manager.checkConn("downloader");
+                    manager.checkConn("downloader");
                     break;
                 }
             }
