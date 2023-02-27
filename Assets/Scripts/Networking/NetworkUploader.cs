@@ -12,6 +12,8 @@ public string username;
 public string posX;
 public string posY;
 
+public Vector2 animDirection;
+
 public PlayerState(string username){
     this.username = username;
 }
@@ -21,6 +23,11 @@ public void setPos(Vector2 position){
     this.position.x = position.x;
     this.position.y = position.y;
 }
+
+public void setAnimation(Vector2 anim){
+    this.animDirection = anim;
+}
+
 public Vector3 getPos(){
     return position;
 }
@@ -57,6 +64,7 @@ public class NetworkUploader : MonoBehaviour
                 if(pState.username != manager.username){pState.username=manager.username;}   
                 if(Mathf.Abs(player.position.x - pState.getPos().x) > 0.1f || Mathf.Abs(player.position.y -pState.getPos().y) > 0.1f){
                     pState.setPos(player.position);
+                    pState.setAnimation(player.GetComponent<PlayerMovement>().animDirection);
                     string sData = pState.jsonString();
                     char[] cData = new char[sData.Length];
                     for (int i = 0; i < sData.Length; i++)
