@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
     public int[] lastPress;
     public int[] keyStates;
     public Animator animator;
+    public bool isMoving = false;
 
     void Start()
     {
@@ -57,13 +58,15 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if(Vector2.Distance(transform.position, moveTo.position)!=0){
-            transform.position = Vector2.MoveTowards(transform.position, moveTo.position, moveSpeed*Time.deltaTime);
-            animator.SetBool("Movement", true);
+            transform.position = Vector2.MoveTowards(transform.position, moveTo.position, moveSpeed*Time.fixedDeltaTime);
+            isMoving = true;
+            animator.SetBool("Movement", isMoving);
 
         }else{
             moveTo.position += movDirection;
             if(movDirection.x == 0 && movDirection.y == 0){
-                animator.SetBool("Movement", false);
+                isMoving = false;
+                animator.SetBool("Movement", isMoving);
             }
         }
     }
