@@ -210,6 +210,7 @@ public class NetworkOperator : MonoBehaviour
                     newPlayerMoveTo.transform.position = moveToPos;
                     newPlayer.transform.GetComponent<otherPlayer>().myMoveTo = newPlayerMoveTo.transform;
                     newPlayer.transform.GetComponent<otherPlayer>().mySpeed = ((float)playersInformation[i].speed)/10;
+                    newPlayer.transform.GetComponent<otherPlayer>().myId = i;
                     playersObjects.Add(newPlayer);
                     moveToObjects.Add(newPlayerMoveTo);
                 }                
