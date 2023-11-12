@@ -66,6 +66,8 @@ class Server():
             newClient = Client(address, connection, len(self.clients), self)
             self.clients.append(newClient)
             self.clients[-1].manage()
+            print(newClient.address, end=" ")
+            print("is now connected.")
 
 server = Server("0.0.0.0", 1404)
 server.initialize()
