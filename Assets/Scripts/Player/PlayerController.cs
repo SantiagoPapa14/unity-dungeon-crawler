@@ -5,16 +5,19 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-    public Transform movePoint;
+    public Transform moveTo;
     public float moveSpeed;
     public Animator anim;
-    PlayerHealth pHealth;
+    public PlayerHealth pHealth;
+
+    public bool isMoving;
 
     // Start is called before the first frame update
     void Start()
     {   
-        movePoint.parent = null;
+        moveTo.parent = null;
         pHealth = transform.GetComponent<PlayerHealth>();
+        isMoving = false;
     }
 
     // Update is called once per frame
@@ -23,22 +26,23 @@ public class PlayerController : MonoBehaviour
     {
         checkSprint();
         movement();
+        anim.SetBool("Moving", isMoving);
     }
 
     void movement(){
-        transform.position = Vector3.MoveTowards(transform.position, movePoint.position, moveSpeed*Time.deltaTime);
-        if(Vector3.Distance(transform.position, movePoint.position) <= .5f){
+        transform.position = Vector3.MoveTowards(transform.position, moveTo.position, moveSpeed*Time.deltaTime);
+        if(Vector3.Distance(transform.position, moveTo.position) <= .5f){
 
             if(Mathf.Abs(Input.GetAxisRaw("Horizontal"))==1f){
-                movePoint.position += new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f);
+                moveTo.position += new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f);
             }
             else if(Mathf.Abs(Input.GetAxisRaw("Vertical"))==1f){
-                movePoint.position += new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f);
+                moveTo.position += new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f);
             }
-            anim.SetBool("Moving", false);
+            isMoving = false;
         }
         else{
-            anim.SetBool("Moving", true);
+            isMoving = true;
         }
     }
 

@@ -93,7 +93,7 @@ public class NetworkOperator : MonoBehaviour
     #region Movement Transmission Variables
     public Transform player;
     public Transform lastMoveto;
-    public PlayerMovement pMovement;
+    public PlayerController pMovement;
     public float lastRegisteredSpeed;
     #endregion Movement Transmission Variables
 #endregion Variables
@@ -103,7 +103,7 @@ public class NetworkOperator : MonoBehaviour
     void Start(){
         //Hook objects before they get a new name
         player = GameObject.Find("Player").transform;
-        pMovement = player.GetComponent<PlayerMovement>();
+        pMovement = player.GetComponent<PlayerController>();
         lastMoveto = new GameObject("lastMovetoRegistered").transform;
         lastMoveto.parent=null;
 
