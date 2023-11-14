@@ -41,6 +41,9 @@ def handleClient(conn, add, index):
             clients.pop(index)
             break
 
+        
+
+
 #Preliminary Actions
 sock.bind(('0.0.0.0', 1404))  
 sock.listen()
@@ -54,3 +57,7 @@ while True:
     clients.append(connection)
     clientHandler = Thread(target=handleClient, args=(connection, address, clientsAmmount,))
     clientHandler.start()
+    
+
+
+	
