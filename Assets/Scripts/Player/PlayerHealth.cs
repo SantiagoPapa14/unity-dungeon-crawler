@@ -8,10 +8,13 @@ public class PlayerHealth : MonoBehaviour
 
     public float health;
     public Image healthBar;
+
     public float stamina;
     public Image staminaBar;
-    public bool drainingStamina;
+
     public float mana;
+    
+    public bool drainingStamina;
 
     // Start is called before the first frame update
     void Start()

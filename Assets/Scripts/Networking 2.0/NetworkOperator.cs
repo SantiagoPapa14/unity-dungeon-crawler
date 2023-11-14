@@ -42,6 +42,9 @@ public class PlayerUpdatePacket : RenderPacket{
     }
 
 }
+public class Client{
+
+}
 
 public class PlayerInformation{
     public string username;
@@ -97,7 +100,6 @@ public class NetworkOperator : MonoBehaviour
 #region Methods
 
     #region Unity Main Thread Functions
-
     void Start(){
         //Hook objects before they get a new name
         player = GameObject.Find("Player").transform;
@@ -109,14 +111,13 @@ public class NetworkOperator : MonoBehaviour
         _receiverThread = new Thread(receivePackets);
         onlineMode = false;
     }
-
     void Update(){
         uploadMovement();
         syncronizeObjects();
     }
     #endregion Unity Main Thread Functions
 
-    #region Generic Client Functions  
+    #region Generic Client Functions
     public void sendPacket(Packet packet){
 
         #region Serialize packet into char array to be sent by writer
@@ -168,78 +169,75 @@ public class NetworkOperator : MonoBehaviour
 
     #region Information and Object Sync Methods
     public int getInformationIndexByUsername(string username){
-        for (int i = 0; i < playersInformation.Count; i++)
-        {
-            if(playersInformation[i].username == username){
-                return i;
-            }
+        foreach(PlayerInformation pInfo in playersInformation){
+            if(pInfo.username==username){ return playersInformation.IndexOf(pInfo); }
         }
         //returns -1 if player is not known
         return -1;
     }
     public bool playerExists(string username){
-        for (int i = 0; i < playersObjects.Count; i++)
-        {
-            if(playersObjects[i].name == username){
-                return true;
-            }
+        foreach(GameObject playerObj in playersObjects){
+            if(playerObj.name==username){ return true; }
         }
         return false;
     }
+    bool hasUnrenderedPlayers(){
+        return !(playersInformation.Count==playersObjects.Count);
+    }
+    Vector3[] pInfoVector3Parse(PlayerInformation pInfo){
+        Vector3 playerPos = new Vector3(
+            ((float)pInfo.position[0])/10,
+            ((float)pInfo.position[1])/10
+        );
+        Vector3 moveToPos = new Vector3(
+            ((float)pInfo.moveTo[0])/10,
+            ((float)pInfo.moveTo[1])/10
+        );
+        return new [] { playerPos, moveToPos };
+    }
+    void spawnPlayer(PlayerInformation pInfo){
+        GameObject newPlayer = Instantiate(spawnablePlayer);
+        newPlayer.transform.parent = null;
+        newPlayer.transform.name = pInfo.username;
+
+        GameObject newPlayerMoveTo = new GameObject(pInfo.username+"MoveTo");
+        newPlayerMoveTo.transform.parent = null;
+
+        Vector3 playerPos = pInfoVector3Parse(pInfo)[0];
+        Vector3 moveToPos = pInfoVector3Parse(pInfo)[1];
+
+        newPlayer.transform.position = playerPos;
+        newPlayerMoveTo.transform.position = moveToPos;
+
+        newPlayer.transform.GetComponent<otherPlayer>().myMoveTo = newPlayerMoveTo.transform;
+        newPlayer.transform.GetComponent<otherPlayer>().mySpeed = ((float)pInfo.speed)/10;
+        newPlayer.transform.GetComponent<otherPlayer>().myId = pInfo.id;
+
+        playersObjects.Add(newPlayer);
+        moveToObjects.Add(newPlayerMoveTo);        
+    }
+    void updatePlayersPos(){
+        foreach(PlayerInformation pInfo in playersInformation){
+            int index = playersInformation.IndexOf(pInfo);
+            Vector3 playerPos = pInfoVector3Parse(playersInformation[index])[0];
+            Vector3 moveToPos = pInfoVector3Parse(playersInformation[index])[1];
+            Vector3 diffPos = playersObjects[index].transform.position - moveToPos;
+            if(diffPos.magnitude>=1.5f){
+                playersObjects[index].transform.position = playerPos;
+            }
+            playersObjects[index].transform.GetComponent<otherPlayer>().mySpeed = ((float)playersInformation[index].speed)/10;
+            moveToObjects[index].transform.position = moveToPos;
+        }
+    }
     void syncronizeObjects(){
-
-        //If there's players in the queue spawn them
-        if(playersInformation.Count != playersObjects.Count){
-            for (int i = 0; i < playersInformation.Count; i++)
-            {
-                if(!playerExists(playersInformation[i].username)){
-                    GameObject newPlayer = Instantiate(spawnablePlayer);
-                    GameObject newPlayerMoveTo = new GameObject(playersInformation[i].username+"MoveTo");
-                    newPlayerMoveTo.transform.parent = null;
-                    newPlayer.transform.parent = null;
-                    newPlayer.transform.name = playersInformation[i].username;
-                    Vector3 playerPos = new Vector3(
-                        ((float)playersInformation[i].position[0])/10,
-                        ((float)playersInformation[i].position[1])/10
-                    );
-                    Vector3 moveToPos = new Vector3(
-                        ((float)playersInformation[i].moveTo[0])/10,
-                        ((float)playersInformation[i].moveTo[1])/10
-                    );
-                    newPlayer.transform.position = playerPos;
-                    newPlayerMoveTo.transform.position = moveToPos;
-                    newPlayer.transform.GetComponent<otherPlayer>().myMoveTo = newPlayerMoveTo.transform;
-                    newPlayer.transform.GetComponent<otherPlayer>().mySpeed = ((float)playersInformation[i].speed)/10;
-                    newPlayer.transform.GetComponent<otherPlayer>().myId = i;
-                    playersObjects.Add(newPlayer);
-                    moveToObjects.Add(newPlayerMoveTo);
-                }                
-            }
-        }
-        else{
-
-            //If we know the player, update him
-            for (int i = 0; i < playersInformation.Count; i++)
-            {
-                //Parse from int to float
-                Vector3 playerPos = new Vector3(
-                    ((float)playersInformation[i].position[0])/10,
-                    ((float)playersInformation[i].position[1])/10
-                );
-                Vector3 moveToPos = new Vector3(
-                    ((float)playersInformation[i].moveTo[0])/10,
-                    ((float)playersInformation[i].moveTo[1])/10
-                );
-
-                //If he is more than a tile away from his moveTo teleport him to where he was last seen
-                Vector3 diffPos = playersObjects[i].transform.position - moveToPos;
-                if(diffPos.magnitude>=1.5f){
-                    playersObjects[i].transform.position = playerPos;
+        if(hasUnrenderedPlayers()){
+            foreach(PlayerInformation pInfo in playersInformation){
+                if(!playerExists(pInfo.username)){
+                    spawnPlayer(pInfo);
                 }
-                playersObjects[i].transform.GetComponent<otherPlayer>().mySpeed = ((float)playersInformation[i].speed)/10;
-                moveToObjects[i].transform.position = moveToPos;
             }
         }
+        updatePlayersPos();
     }
     #endregion
 
